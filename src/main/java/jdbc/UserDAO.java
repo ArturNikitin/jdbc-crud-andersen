@@ -12,5 +12,6 @@ public interface UserDAO {
     void delete(User user);
     List<User> getAllUsers();
     List<User> getUsersByRole(Role role);
+    User addRole(User user, Role role);
 
 }

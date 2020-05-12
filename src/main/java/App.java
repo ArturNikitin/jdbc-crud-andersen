@@ -19,9 +19,7 @@ public class App {
         final Connection connection = DriverManager.getConnection(url, user, password);
         RoleDAO roleDAO = new RoleDAOimpl(connection);
         UserDAO userDAO = new UserDAOimpl(connection);
-        roleDAO.findAllRoles().forEach(x -> System.out.println(x.toString()));
-
-
+        userDAO.getUsersByRole(roleDAO.read("actor")).forEach(x -> System.out.println(x.getName() + " " + x.getLastName()));
         connection.close();
     }
 }
