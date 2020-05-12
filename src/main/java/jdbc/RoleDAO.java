@@ -11,5 +11,6 @@ public interface RoleDAO {
     Role read(String name);
     void delete(Role role);
     List<Role> findAllRoles();
-    List<Role> findAllRolesByUser(User user);
+    List<Role> getAllRolesByUser(User user);
+    Role addUser(Role role, User user);
 }

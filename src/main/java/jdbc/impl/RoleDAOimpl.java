@@ -86,7 +86,34 @@ public class RoleDAOimpl implements RoleDAO {
     }
 
     @Override
-    public List<Role> findAllRolesByUser(User user) {
-        return null;
+    public List<Role> getAllRolesByUser(User user) {
+        List<Role> roles = new ArrayList<>();
+        try(PreparedStatement statement = connection.prepareStatement("SELECT r.id, r.name FROM (SELECT ur.role_id as urid FROM users_roles AS ur " +
+                "INNER JOIN users as u ON ur.user_id = u.id WHERE u.id = (?)) as temp " +
+                "INNER JOIN roles AS r ON temp.urid = r.id")) {
+            statement.setInt(1, user.getId());
+            final ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                roles.add(new Role(resultSet.getInt("id"), resultSet.getString("name")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (roles.isEmpty()) {
+            return null;
+        }
+        return roles;
+    }
+
+    @Override
+    public Role addUser(Role role, User user) {
+        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO users_roles VALUES ((?), (?)) ")) {
+            statement.setInt(1,user.getId());
+            statement.setInt(2, role.getId());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return role;
     }
 }
