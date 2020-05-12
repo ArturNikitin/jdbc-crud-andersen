@@ -31,12 +31,15 @@ public class RoleDAOimpl implements RoleDAO {
     }
 
     @Override
-    public Role update(Role role) {
+    public Role update(Role role) throws SQLException {
         try(PreparedStatement statement = connection.prepareStatement("UPDATE roles SET name = (?) WHERE id = (?)")) {
+            connection.setAutoCommit(false);
             statement.setString(1, role.getName());
             statement.setInt(2, role.getId());
             statement.execute();
+            connection.commit();
         } catch (SQLException e) {
+            connection.rollback();
             e.printStackTrace();
         }
         return role;

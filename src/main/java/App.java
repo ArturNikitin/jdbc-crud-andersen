@@ -3,6 +3,7 @@ import jdbc.UserDAO;
 import jdbc.Utils;
 import jdbc.impl.RoleDAOimpl;
 import jdbc.impl.UserDAOimpl;
+import model.Role;
 import model.User;
 
 import java.sql.Connection;
