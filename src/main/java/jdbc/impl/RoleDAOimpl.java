@@ -1,6 +1,7 @@
 package jdbc.impl;
 
 import jdbc.RoleDAO;
+import jdbc.Utils;
 import model.Role;
 import model.User;
 
@@ -12,15 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoleDAOimpl implements RoleDAO {
-    private final Connection connection;
 
-    public RoleDAOimpl(Connection connection) {
-        this.connection = connection;
-    }
 
     @Override
     public Role create(String name) {
-        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO roles (name) VALUES (?)")) {
+        try(
+                Connection connection = Utils.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement("INSERT INTO roles (name) VALUES (?)")) {
             statement.setString(1, name);
             statement.execute();
         } catch (SQLException e) {
@@ -32,7 +32,13 @@ public class RoleDAOimpl implements RoleDAO {
 
     @Override
     public Role update(Role role) throws SQLException {
-        try(PreparedStatement statement = connection.prepareStatement("UPDATE roles SET name = (?) WHERE id = (?)")) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try
+                {
+            connection = Utils.getConnection();
+            statement = connection
+                    .prepareStatement("UPDATE roles SET name = (?) WHERE id = (?)");
             connection.setAutoCommit(false);
             statement.setString(1, role.getName());
             statement.setInt(2, role.getId());
@@ -41,6 +47,9 @@ public class RoleDAOimpl implements RoleDAO {
         } catch (SQLException e) {
             connection.rollback();
             e.printStackTrace();
+        } finally {
+            statement.close();
+            connection.close();
         }
         return role;
     }
@@ -49,7 +58,10 @@ public class RoleDAOimpl implements RoleDAO {
     public Role read(String name) {
         Role role = new Role();
 
-        try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM roles WHERE NAME = (?)")) {
+        try(
+                Connection connection = Utils.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement("SELECT * FROM roles WHERE NAME = (?)")) {
             statement.setString(1, name);
             final ResultSet set = statement.executeQuery();
             if (set.next()) {
@@ -65,7 +77,10 @@ public class RoleDAOimpl implements RoleDAO {
 
     @Override
     public void delete(Role role) {
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM roles WHERE id = (?)")) {
+        try (
+                Connection connection = Utils.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement("DELETE FROM roles WHERE id = (?)")) {
             statement.setInt(1, role.getId());
             statement.execute();
         } catch (SQLException e) {
@@ -77,7 +92,10 @@ public class RoleDAOimpl implements RoleDAO {
     public List<Role> findAllRoles() {
         List<Role> roles = new ArrayList<>();
 
-        try(PreparedStatement statement = connection.prepareStatement("SELECT * FROM roles")) {
+        try(
+                Connection connection = Utils.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement("SELECT * FROM roles")) {
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 roles.add(new Role(resultSet.getInt("id"), resultSet.getString("name")));
@@ -91,7 +109,11 @@ public class RoleDAOimpl implements RoleDAO {
     @Override
     public List<Role> getAllRolesByUser(User user) {
         List<Role> roles = new ArrayList<>();
-        try(PreparedStatement statement = connection.prepareStatement("SELECT r.id, r.name FROM (SELECT ur.role_id as urid FROM users_roles AS ur " +
+        try(
+                Connection connection = Utils.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement("SELECT r.id, r.name " +
+                                "FROM (SELECT ur.role_id as urid FROM users_roles AS ur " +
                 "INNER JOIN users as u ON ur.user_id = u.id WHERE u.id = (?)) as temp " +
                 "INNER JOIN roles AS r ON temp.urid = r.id")) {
             statement.setInt(1, user.getId());
@@ -110,7 +132,10 @@ public class RoleDAOimpl implements RoleDAO {
 
     @Override
     public Role addUser(Role role, User user) {
-        try(PreparedStatement statement = connection.prepareStatement("INSERT INTO users_roles VALUES ((?), (?)) ")) {
+        try(
+                Connection connection = Utils.getConnection();
+                PreparedStatement statement = connection
+                        .prepareStatement("INSERT INTO users_roles VALUES ((?), (?)) ")) {
             statement.setInt(1,user.getId());
             statement.setInt(2, role.getId());
             statement.execute();

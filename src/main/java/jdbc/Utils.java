@@ -11,13 +11,8 @@ public class Utils {
     private static final String URL = "jdbc:postgresql://localhost:5432/user_role";
 
     public static Connection getConnection() throws SQLException {
-        if (connection == null) {
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
-        }
-        return connection;
+        return connection = DriverManager.getConnection(URL, USER, PASSWORD);
     }
-    private Utils(){
 
-    }
 
 }

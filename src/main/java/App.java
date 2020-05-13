@@ -12,10 +12,8 @@ import java.sql.SQLException;
 public class App {
     public static void main(String[] args) throws SQLException {
 
-        final Connection connection = Utils.getConnection();
-        RoleDAO roleDAO = new RoleDAOimpl(connection);
-        UserDAO userDAO = new UserDAOimpl(connection);
+        RoleDAO roleDAO = new RoleDAOimpl();
+        UserDAO userDAO = new UserDAOimpl();
 
-        connection.close();
     }
 }
